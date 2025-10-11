@@ -46,14 +46,14 @@ export default function Home() {
       ))}
       
       {/* Content container */}
-      <div className="relative z-20 font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
+      <div className="relative z-20 font-satoshi grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start relative z-20">
       
         
 
         <header className="w-full px-4 sm:px-0">
           <h1
-            className="group text-4xl sm:text-5xl font-extrabold text-center sm:text-left leading-tight transition-colors duration-200"
+            className="text-4xl sm:text-5xl font-cabinet font-extrabold text-center sm:text-left leading-tight transition-colors duration-200"
           >
             <span
               className={`
@@ -73,7 +73,7 @@ export default function Home() {
               🍺
             </span>
           </h1>
-          <p className="mt-2 text-md text-black text-center sm:text-left">
+          <p className="mt-2 text-md text-black text-center sm:text-left font-satoshi">
             A page dedicated to AK's undying love for beer.
           </p>
         </header>
@@ -152,7 +152,7 @@ export default function Home() {
                 <div className={`transition-all duration-300 ease-in-out ${isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
                   <Card className="flex flex-col items-stretch w-full max-w-2xl">
                   <CardHeader className="border-b pb-6">
-                    <h2 className="text-xl sm:text-2xl font-bold">{cards[displayCurrent].header}</h2>
+                    <h2 className="text-xl sm:text-2xl font-cabinet font-bold">{cards[displayCurrent].header}</h2>
                   </CardHeader>
                    <div className="flex flex-row items-center px-6 py-6 gap-6">
                      <Image
@@ -163,7 +163,7 @@ export default function Home() {
                        className="rounded-lg object-cover aspect-square bg-muted flex-shrink-0"
                      />
                      <div className="flex-1 min-w-0">
-                       <div className="text-muted-foreground text-base mb-4">
+                       <div className="text-muted-foreground text-base mb-4 font-satoshi">
                          {cards[displayCurrent].text}
                        </div>
                        <div className="flex gap-2 items-center flex-col sm:flex-row">
@@ -264,7 +264,7 @@ export default function Home() {
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <Popover>
           <PopoverTrigger asChild>
-            <button className="flex items-center gap-2 hover:underline hover:underline-offset-4 transition-all duration-200 hover:scale-105 active:scale-95 active:opacity-70">
+            <button className="flex items-center gap-2 hover:underline hover:underline-offset-4 transition-all duration-200 hover:scale-105 active:scale-95 active:opacity-70 font-satoshi">
           <Image
             aria-hidden
                 src="/slider.svg"
@@ -276,7 +276,7 @@ export default function Home() {
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-64 p-4 animate-in fade-in-0 zoom-in-95 duration-500 ease-out data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:duration-300">
-              <h3 className="font-semibold mb-2 text-center">
+              <h3 className="font-cabinet font-semibold mb-2 text-center">
                 How much does AK love beer?
               </h3>
 
@@ -303,13 +303,13 @@ export default function Home() {
               </Slider>
 
               {/* Rating number */}
-              <p className="mt-2 text-center text-sm text-muted-foreground transition-all duration-200">
+              <p className="mt-2 text-center text-sm text-muted-foreground transition-all duration-200 font-satoshi">
                 <span className="font-semibold text-lg">{rating}</span> / 10
               </p>
 
               {/* Dynamic message with colored background */}
               <div
-                className={`mt-2 p-2 rounded text-center font-medium text-black text-sm transition-all duration-300 animate-in fade-in-0 slide-in-from-bottom-2 ${
+                className={`mt-2 p-2 rounded text-center font-medium text-black text-sm transition-all duration-300 animate-in fade-in-0 slide-in-from-bottom-2 font-satoshi ${
                   rating <= 3
                     ? "bg-yellow-100 border border-yellow-200"
                     : rating <= 7
@@ -329,7 +329,7 @@ export default function Home() {
         </Popover>
         
         <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4 transition-all duration-200 hover:scale-105"
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4 transition-all duration-200 hover:scale-105 font-satoshi"
           href="https://www.linkedin.com/in/akshat-parikh-158286234/"
           target="_blank"
           rel="noopener noreferrer"
@@ -345,7 +345,7 @@ export default function Home() {
           Who Is Akshat Parikh?
         </a>
         <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4 transition-all duration-200 hover:scale-105"
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4 transition-all duration-200 hover:scale-105 font-satoshi"
           href="https://www.theboogaloobali.com/product/bintang-radler-330ml/"
           target="_blank"
           rel="noopener noreferrer"

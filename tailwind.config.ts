@@ -8,6 +8,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        'cabinet': ['var(--font-cabinet-grotesk)', 'Cabinet Grotesk', 'system-ui', '-apple-system', 'sans-serif'],
+        'satoshi': ['var(--font-satoshi)', 'Satoshi', 'system-ui', '-apple-system', 'sans-serif'],
+      },
       animation: {
         "fade-in": "fadeIn 0.5s ease-in-out",
         "slide-in": "slideIn 0.3s ease-out",
