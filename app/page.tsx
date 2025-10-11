@@ -1,22 +1,70 @@
+"use client";
+
 import Image from "next/image";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+  const router = useRouter();
+  const [bubbles, setBubbles] = useState<Array<{left: string, delay: string, duration: string}>>([]);
 
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  useEffect(() => {
+    const newBubbles = Array.from({ length: 20 }, () => ({
+      left: `${Math.random() * 100}%`,
+      delay: `${Math.random() * 8}s`,
+      duration: `${6 + Math.random() * 6}s`,
+    }));
+    console.log('Bubbles generated:', newBubbles.length);
+    setBubbles(newBubbles);
+  }, []);
+  
+  return (
+    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-b from-amber-100 via-amber-200 to-amber-500"></div>
+      <div className="absolute top-0 left-0 w-full h-16 bg-white/90 rounded-b-[50%] shadow-md"></div>
+      {bubbles.map((bubble, i) => (
+        <div
+          key={i}
+          className="absolute w-4 h-4 bg-white/90 rounded-full animate-bubble z-10"
+          style={{
+            left: bubble.left,
+            bottom: '0px',
+            animationDelay: bubble.delay,
+            animationDuration: bubble.duration,
+          }}
+        />
+      ))}
+      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start relative z-20">
+      
+        
+
+        <header className="w-full px-4 sm:px-0">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-center sm:text-left leading-tight">
+            Cheers <span aria-hidden>🍺</span>
+          </h1>
+          <p className="mt-2 text-md text-muted-foreground text-center sm:text-left">
+            Akshat's Undying Love for Beer.
+          </p>
+        </header>
+        
+        {/* Example Card */}
+        <div className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm max-w-sm w-full">
+          <div className="grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 pb-6 border-b">
+            <div className="leading-none font-semibold text-lg">Whoah, look at my first card!</div>
+            <div className="text-muted-foreground text-sm">
+              This is my first card. Neat? If you don't think so, fade yourself.
+            </div>
+          </div>
+          <div className="px-6">
+            <button
+              className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2"
+              onClick={() => alert("Card button clicked!")}
+            >
+              Rad Button
+            </button>
+          </div>
+        </div>
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <a
