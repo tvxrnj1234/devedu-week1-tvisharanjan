@@ -67,7 +67,7 @@ export default function Home() {
             {
               header: "Frat Flick",
               img: "/beer1.png",
-              text: "Here's some amazing beer trivia. Did you know the first professional brewers were women?",
+              text: "In his past life, AK was the pledgemaster at Cal Fiji. Also, if you look to the right, his friends are really concerned for him.",
             },
             {
               header: "A New York Minute",
@@ -77,12 +77,12 @@ export default function Home() {
             {
               header: "When His Love For Bintangs Began",
               img: "/beer3.png",
-              text: "There are countless beer styles in the world. Explore lagers, ales, stouts, and more.",
+              text: "As soon as AK touched Bali dirt and got a hold of his first Bintang bottle, he was bound to falling in love.",
             },
             {
-              header: "Always Rizzes When He's Holding A Beer Can",
+              header: "Always Rizzing When Holding A Beer Can",
               img: "/beer4.png",
-              text: "Cheers to trying new things! Always enjoy responsibly and savor the craft.",
+              text: "Don't give AK a Coors bottle at a dayger or he'll end up stealing your girl.",
             }
           ];
 
@@ -214,36 +214,60 @@ export default function Home() {
                 width={16}
                 height={16}
               />
-              Rate his addiction
+              Rate His Addiction
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-64 p-4">
-            <h3 className="font-semibold mb-2 text-center">How much does AK love beer?</h3>
-            <Slider
-              value={[rating]}
-              max={10}
-              step={1}
-              onValueChange={(val) => setRating(val[0])}
-              className="h-2 w-full mt-4 relative touch-none select-none"
-            >
-              {/* Track */}
-              <div className="absolute h-2 bg-gray-200 rounded-full w-full" />
-              {/* Filled track */}
+              <h3 className="font-semibold mb-2 text-center">
+                How much does AK love beer?
+              </h3>
+
+              {/* Slider */}
+              <Slider
+                value={[rating]}
+                max={10}
+                step={1}
+                onValueChange={(val) => setRating(val[0])}
+                className="h-2 w-full mt-4 relative touch-none select-none"
+              >
+                {/* Track */}
+                <div className="absolute h-2 bg-gray-200 rounded-full w-full" />
+                {/* Filled track */}
+                <div
+                  className="absolute h-2 bg-amber-400 rounded-full"
+                  style={{ width: `${(rating / 10) * 100}%` }}
+                />
+                {/* Thumb */}
+                <div
+                  className="absolute h-6 w-6 bg-white border border-gray-400 rounded-full -translate-y-1/2 cursor-pointer shadow"
+                  style={{ left: `${(rating / 10) * 100}%` }}
+                />
+              </Slider>
+
+              {/* Rating number */}
+              <p className="mt-2 text-center text-sm text-muted-foreground">
+                {rating} / 10
+              </p>
+
+              {/* Dynamic message with colored background */}
               <div
-                className="absolute h-2 bg-amber-400 rounded-full"
-                style={{ width: `${(rating / 10) * 100}%` }}
-              />
-              {/* Thumb */}
-              <div
-                className="absolute h-6 w-6 bg-white border border-gray-400 rounded-full -translate-y-1/2 cursor-pointer shadow"
-                style={{ left: `${(rating / 10) * 100}%` }}
-              />
-            </Slider>
-            
-            <p className="mt-2 text-center text-sm text-muted-foreground">
-              {rating} / 10
-            </p>
-          </PopoverContent>
+                className={`mt-2 p-2 rounded text-center font-medium text-black text-sm ${
+                  rating <= 3
+                    ? "bg-yellow-100"
+                    : rating <= 7
+                    ? "bg-orange-100"
+                    : "bg-red-100"
+                }`}
+              >
+                {rating <= 3
+                  ? "👑 A sober king indeed (this is a total lie)"
+                  : rating <= 7
+                  ? "⚠️ Someone stop him before he's in too deep"
+                  : "❗ Okay alcoholic alert"}
+              </div>
+            </PopoverContent>
+
+
         </Popover>
         
         <a
@@ -259,7 +283,7 @@ export default function Home() {
             width={16}
             height={16}
           />
-          Who is Akshat Parikh?
+          Who Is Akshat Parikh?
         </a>
         <a
           className="flex items-center gap-2 hover:underline hover:underline-offset-4"
@@ -274,7 +298,7 @@ export default function Home() {
             width={16}
             height={16}
           />
-          Buy a Lemon Bintang →
+          Buy A Lemon Bintang →
         </a>
       </footer>
       </div>
