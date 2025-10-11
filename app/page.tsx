@@ -4,13 +4,15 @@ import Image from "next/image";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Toaster } from "sonner";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Slider } from "@/components/ui/slider";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 export default function Home() {
   const router = useRouter();
   const [bubbles, setBubbles] = useState<Array<{left: string, delay: string, duration: string}>>([]);
-
+  const [rating, setRating] = useState(5);
   useEffect(() => {
     const newBubbles = Array.from({ length: 20 }, () => ({
       left: `${Math.random() * 100}%`,
@@ -63,22 +65,22 @@ export default function Home() {
         {(() => {
           const cards = [
             {
-              header: "Card One",
+              header: "Frat Flick",
               img: "/beer1.png",
               text: "Here's some amazing beer trivia. Did you know the first professional brewers were women?",
             },
             {
-              header: "Card Two",
+              header: "A New York Minute",
               img: "/beer2.png",
-              text: "Hops give beer its distinctive bitterness and aroma. Try a hoppy IPA today!",
+              text: "AK was on a beer diet for 2 months while interning in NYC and put his friends on it too. Now everyone's a beer addict.",
             },
             {
-              header: "Card Three",
+              header: "When His Love For Bintangs Began",
               img: "/beer3.png",
               text: "There are countless beer styles in the world. Explore lagers, ales, stouts, and more.",
             },
             {
-              header: "Card Four",
+              header: "Always Rizzes When He's Holding A Beer Can",
               img: "/beer4.png",
               text: "Cheers to trying new things! Always enjoy responsibly and savor the craft.",
             }
@@ -202,21 +204,48 @@ export default function Home() {
 
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="flex items-center gap-2 hover:underline hover:underline-offset-4">
+              <Image
+                aria-hidden
+                src="/slider.svg"
+                alt="File icon"
+                width={16}
+                height={16}
+              />
+              Rate his addiction
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-64 p-4">
+            <h3 className="font-semibold mb-2 text-center">How much does AK love beer?</h3>
+            <Slider
+              value={[rating]}
+              max={10}
+              step={1}
+              onValueChange={(val) => setRating(val[0])}
+              className="h-2 w-full mt-4 relative touch-none select-none"
+            >
+              {/* Track */}
+              <div className="absolute h-2 bg-gray-200 rounded-full w-full" />
+              {/* Filled track */}
+              <div
+                className="absolute h-2 bg-amber-400 rounded-full"
+                style={{ width: `${(rating / 10) * 100}%` }}
+              />
+              {/* Thumb */}
+              <div
+                className="absolute h-6 w-6 bg-white border border-gray-400 rounded-full -translate-y-1/2 cursor-pointer shadow"
+                style={{ left: `${(rating / 10) * 100}%` }}
+              />
+            </Slider>
+            
+            <p className="mt-2 text-center text-sm text-muted-foreground">
+              {rating} / 10
+            </p>
+          </PopoverContent>
+        </Popover>
+        
         <a
           className="flex items-center gap-2 hover:underline hover:underline-offset-4"
           href="https://www.linkedin.com/in/akshat-parikh-158286234/"
