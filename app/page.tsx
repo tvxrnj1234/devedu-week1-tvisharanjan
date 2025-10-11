@@ -11,13 +11,15 @@ import { useState, useEffect } from "react";
 
 export default function Home() {
   const router = useRouter();
-  const [bubbles, setBubbles] = useState<Array<{left: string, delay: string, duration: string}>>([]);
+  const [bubbles, setBubbles] = useState<Array<{left: string, delay: string, duration: string, size: string, opacity: string}>>([]);
   const [rating, setRating] = useState(5);
   useEffect(() => {
-    const newBubbles = Array.from({ length: 20 }, () => ({
+    const newBubbles = Array.from({ length: 30 }, (_, i) => ({
       left: `${Math.random() * 100}%`,
-      delay: `${Math.random() * 8}s`,
-      duration: `${6 + Math.random() * 6}s`,
+      delay: `${Math.random() * 5}s`, // Faster delays
+      duration: `${3 + Math.random() * 4}s`, // Faster animation
+      size: i < 20 ? 'w-5 h-5' : 'w-3 h-3', // Slightly bigger bubbles
+      opacity: i < 20 ? 'bg-white/95' : 'bg-white/70', // More visible
     }));
     console.log('Bubbles generated:', newBubbles.length);
     setBubbles(newBubbles);
@@ -33,7 +35,7 @@ export default function Home() {
       {bubbles.map((bubble, i) => (
         <div
           key={i}
-          className="absolute w-4 h-4 bg-white/90 rounded-full animate-bubble z-10"
+          className={`absolute ${bubble.size} ${bubble.opacity} rounded-full animate-bubble z-10`}
           style={{
             left: bubble.left,
             bottom: '0px',
@@ -50,8 +52,26 @@ export default function Home() {
         
 
         <header className="w-full px-4 sm:px-0">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-center sm:text-left leading-tight">
-            Cheers <span aria-hidden>🍺</span>
+          <h1
+            className="group text-4xl sm:text-5xl font-extrabold text-center sm:text-left leading-tight transition-colors duration-200"
+          >
+            <span
+              className={`
+                text-black transition-all duration-300
+                group-hover:bg-gradient-to-r group-hover:from-yellow-400 group-hover:via-orange-500 group-hover:to-orange-700
+                group-hover:bg-clip-text group-hover:text-transparent
+                group-hover:drop-shadow-[0_2px_8px_rgba(245,158,11,0.33)]
+              `}
+            >
+              Cheers
+            </span>
+            <span
+              aria-hidden
+              className="inline-block transition-transform duration-300 group-hover:-rotate-12 ml-1"
+              style={{ willChange: 'transform' }}
+            >
+              🍺
+            </span>
           </h1>
           <p className="mt-2 text-md text-black text-center sm:text-left">
             A page dedicated to AK's undying love for beer.
@@ -87,28 +107,64 @@ export default function Home() {
           ];
 
           const [current, setCurrent] = useState(0);
+          const [isAnimating, setIsAnimating] = useState(false);
+          const [displayCurrent, setDisplayCurrent] = useState(0);
 
           // Optional: Autoplay or arrow keys, but minimal for simplicity
 
+          const handlePrev = () => {
+            if (isAnimating) return;
+            setIsAnimating(true);
+            // Fade out first
+            setTimeout(() => {
+              setCurrent(current === 0 ? cards.length - 1 : current - 1);
+              setDisplayCurrent(current === 0 ? cards.length - 1 : current - 1);
+            }, 250); // Wait for most of fade-out to complete
+            setTimeout(() => setIsAnimating(false), 300);
+          };
+
+          const handleNext = () => {
+            if (isAnimating) return;
+            setIsAnimating(true);
+            // Fade out first
+            setTimeout(() => {
+              setCurrent((current + 1) % cards.length);
+              setDisplayCurrent((current + 1) % cards.length);
+            }, 250); // Wait for most of fade-out to complete
+            setTimeout(() => setIsAnimating(false), 300);
+          };
+
+          const handleDotClick = (index: number) => {
+            if (isAnimating || index === current) return;
+            setIsAnimating(true);
+            // Fade out first
+            setTimeout(() => {
+              setCurrent(index);
+              setDisplayCurrent(index);
+            }, 250); // Wait for most of fade-out to complete
+            setTimeout(() => setIsAnimating(false), 300);
+          };
+
           return (
             <div className="w-full flex flex-col items-center gap-6 max-w-2xl">
-              <div className="relative w-full">
+              <div className="relative w-full overflow-hidden">
                 {/* Card */}
-                <Card className="flex flex-col items-stretch w-full max-w-2xl animate-fade-in">
+                <div className={`transition-all duration-300 ease-in-out ${isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
+                  <Card className="flex flex-col items-stretch w-full max-w-2xl">
                   <CardHeader className="border-b pb-6">
-                    <h2 className="text-xl sm:text-2xl font-bold">{cards[current].header}</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold">{cards[displayCurrent].header}</h2>
                   </CardHeader>
                    <div className="flex flex-row items-center px-6 py-6 gap-6">
                      <Image
-                       src={cards[current].img}
-                       alt={cards[current].header}
+                       src={cards[displayCurrent].img}
+                       alt={cards[displayCurrent].header}
                        width={128}
                        height={128}
                        className="rounded-lg object-cover aspect-square bg-muted flex-shrink-0"
                      />
                      <div className="flex-1 min-w-0">
                        <div className="text-muted-foreground text-base mb-4">
-                         {cards[current].text}
+                         {cards[displayCurrent].text}
                        </div>
                        <div className="flex gap-2 items-center flex-col sm:flex-row">
                          <a
@@ -125,19 +181,19 @@ export default function Home() {
                           }
                            className="rounded-full border border-solid border-[#FFD600] transition-colors flex items-center justify-center bg-[#FFF8C6] text-black gap-2 hover:bg-[#ffe26f] font-medium text-sm sm:text-base h-9 sm:h-10 px-4 sm:px-5 sm:w-auto"
                            //href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-                           target="_blank"
-                           rel="noopener noreferrer"
-                         >
-                           <Image
-                             className="dark:invert"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Image
+              className="dark:invert"
                              src="/beercheers.png"
-                             alt="Vercel logomark"
+              alt="Vercel logomark"
                              width={16}
                              height={16}
-                           />
+            />
                             Give a cheers!
-                         </a>
-                         <a
+          </a>
+          <a
                           onClick={() =>
                             toast.success("Like sent!", {
                               icon: "💖",
@@ -151,9 +207,9 @@ export default function Home() {
                           }
                           className="rounded-full border border-solid border-pink-200 transition-colors flex items-center justify-center bg-pink-100 text-black gap-2 hover:bg-pink-200 font-medium text-sm sm:text-base h-9 sm:h-10 px-4 sm:px-5 sm:w-auto"
                            //href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-                           target="_blank"
-                           rel="noopener noreferrer"
-                         >
+            target="_blank"
+            rel="noopener noreferrer"
+          >
                           <Image
                              className="dark:invert"
                              src="/heart.png"
@@ -162,15 +218,15 @@ export default function Home() {
                              height={16}
                            />
                            Send a like!
-                         </a>
-                       </div>
+          </a>
+        </div>
                      </div>
                    </div>
                   <div className="flex justify-between px-6">
                     <button
                       className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center rounded-md text-sm font-medium transition-all h-9 px-4 py-2 disabled:opacity-50"
-                      onClick={() => setCurrent(current === 0 ? cards.length - 1 : current - 1)}
-                      disabled={cards.length <= 1}
+                      onClick={handlePrev}
+                      disabled={cards.length <= 1 || isAnimating}
                       aria-label="Previous Card"
                     >
                       &larr; Prev
@@ -179,24 +235,26 @@ export default function Home() {
                       {cards.map((_, i) => (
                         <button
                           key={i}
-                          onClick={() => setCurrent(i)}
-                          className={`w-2 h-2 rounded-full transition-all ${
-                            i === current ? "bg-primary" : "bg-muted"
+                          onClick={() => handleDotClick(i)}
+                          className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                            i === current ? "bg-primary scale-125" : "bg-muted hover:bg-muted/80"
                           }`}
                           aria-label={`Go to slide ${i + 1}`}
+                          disabled={isAnimating}
                         />
                       ))}
                     </div>
                     <button
                       className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center rounded-md text-sm font-medium transition-all h-9 px-4 py-2 disabled:opacity-50"
-                      onClick={() => setCurrent((current + 1) % cards.length)}
-                      disabled={cards.length <= 1}
+                      onClick={handleNext}
+                      disabled={cards.length <= 1 || isAnimating}
                       aria-label="Next Card"
                     >
                       Next &rarr;
                     </button>
                   </div>
-                </Card>
+                  </Card>
+                </div>
               </div>
             </div>
           );
@@ -206,18 +264,18 @@ export default function Home() {
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
         <Popover>
           <PopoverTrigger asChild>
-            <button className="flex items-center gap-2 hover:underline hover:underline-offset-4">
-              <Image
-                aria-hidden
+            <button className="flex items-center gap-2 hover:underline hover:underline-offset-4 transition-all duration-200 hover:scale-105 active:scale-95 active:opacity-70">
+          <Image
+            aria-hidden
                 src="/slider.svg"
-                alt="File icon"
-                width={16}
-                height={16}
-              />
+            alt="File icon"
+            width={16}
+            height={16}
+          />
               Rate His Addiction
             </button>
           </PopoverTrigger>
-          <PopoverContent className="w-64 p-4">
+          <PopoverContent className="w-64 p-4 animate-in fade-in-0 zoom-in-95 duration-500 ease-out data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:duration-300">
               <h3 className="font-semibold mb-2 text-center">
                 How much does AK love beer?
               </h3>
@@ -231,32 +289,32 @@ export default function Home() {
                 className="h-2 w-full mt-4 relative touch-none select-none"
               >
                 {/* Track */}
-                <div className="absolute h-2 bg-gray-200 rounded-full w-full" />
+                <div className="absolute h-2 bg-gray-200 rounded-full w-full transition-all duration-150" />
                 {/* Filled track */}
                 <div
-                  className="absolute h-2 bg-amber-400 rounded-full"
+                  className="absolute h-2 bg-amber-400 rounded-full transition-all duration-300 ease-out"
                   style={{ width: `${(rating / 10) * 100}%` }}
                 />
                 {/* Thumb */}
                 <div
-                  className="absolute h-6 w-6 bg-white border border-gray-400 rounded-full -translate-y-1/2 cursor-pointer shadow"
+                  className="absolute h-6 w-6 bg-white border border-gray-400 rounded-full -translate-y-1/2 cursor-pointer shadow transition-all duration-200 hover:scale-110 hover:shadow-lg"
                   style={{ left: `${(rating / 10) * 100}%` }}
                 />
               </Slider>
 
               {/* Rating number */}
-              <p className="mt-2 text-center text-sm text-muted-foreground">
-                {rating} / 10
+              <p className="mt-2 text-center text-sm text-muted-foreground transition-all duration-200">
+                <span className="font-semibold text-lg">{rating}</span> / 10
               </p>
 
               {/* Dynamic message with colored background */}
               <div
-                className={`mt-2 p-2 rounded text-center font-medium text-black text-sm ${
+                className={`mt-2 p-2 rounded text-center font-medium text-black text-sm transition-all duration-300 animate-in fade-in-0 slide-in-from-bottom-2 ${
                   rating <= 3
-                    ? "bg-yellow-100"
+                    ? "bg-yellow-100 border border-yellow-200"
                     : rating <= 7
-                    ? "bg-orange-100"
-                    : "bg-red-100"
+                    ? "bg-orange-100 border border-orange-200"
+                    : "bg-red-100 border border-red-200"
                 }`}
               >
                 {rating <= 3
@@ -271,7 +329,7 @@ export default function Home() {
         </Popover>
         
         <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4 transition-all duration-200 hover:scale-105"
           href="https://www.linkedin.com/in/akshat-parikh-158286234/"
           target="_blank"
           rel="noopener noreferrer"
@@ -282,11 +340,12 @@ export default function Home() {
             alt="Window icon"
             width={16}
             height={16}
+            className="transition-transform duration-200 hover:scale-110"
           />
           Who Is Akshat Parikh?
         </a>
         <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4 transition-all duration-200 hover:scale-105"
           href="https://www.theboogaloobali.com/product/bintang-radler-330ml/"
           target="_blank"
           rel="noopener noreferrer"
@@ -297,6 +356,7 @@ export default function Home() {
             alt="Globe icon"
             width={16}
             height={16}
+            className="transition-transform duration-200 hover:scale-110"
           />
           Buy A Lemon Bintang →
         </a>
