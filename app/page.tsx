@@ -18,14 +18,17 @@ export default function Home() {
 
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [username, setUsername] = useState("");
 
 
   const [recent, setRecent] = useState<Array<{ id: number; username?: string; rating: number; comment?: string; created_at?: string }>>([]);
 
   const ratingSchema = z.object({
+    username: z.string().optional(),
     rating: z.number().min(0).max(10),
-    comment: z.string().min(3, "Comment too short (min 3 chars)").max(500),
+    comment: z.string().optional(),
   });
+  
 
   useEffect(() => {
     const newBubbles = Array.from({ length: 30 }, (_, i) => ({
@@ -79,7 +82,7 @@ export default function Home() {
     try {
       const { data, error } = await supabase
         .from("beer_ratings")
-        .insert([{ rating, comment, username: "Anon" }])
+        .insert([{ username: username.trim() || "Anonymous", rating, comment }])
         .select(); // optional: return inserted rows
   
       if (error) throw error;
@@ -379,7 +382,7 @@ export default function Home() {
     </Slider>
 
     {/* Rating number */}
-    <p className="mt-2 text-center text-sm text-muted-foreground font-satoshi">
+    <p className="mt-2 text-center text-sm text-muted-foreground font-cabinet font-medium">
       <span className="font-semibold text-lg">{rating}</span> / 10
     </p>
 
@@ -399,6 +402,15 @@ export default function Home() {
         ? "⚠️ Someone stop him before he's in too deep"
         : "❗ Okay alcoholic alert"}
     </div>
+    {/* Username input */}
+    <input
+      type="text"
+      placeholder="Your name (optional)"
+      className="mt-3 w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-300 focus:outline-none"
+      value={username}
+      onChange={(e) => setUsername(e.target.value)}
+    />
+
 
     {/* Comment input */}
     <textarea
@@ -414,7 +426,7 @@ export default function Home() {
     <button
       onClick={handleSubmit}
       disabled={submitting}
-      className={`w-full mt-3 text-white font-medium rounded-md py-2 transition-all duration-200 ${
+      className={`w-full mt-3 text-black font-medium font-cabinet rounded-md py-2 transition-all duration-200 ${
         submitting ? "bg-amber-300 cursor-not-allowed" : "bg-amber-400 hover:bg-amber-500"
       }`}
     >
@@ -422,25 +434,38 @@ export default function Home() {
     </button>
 
     {/* Recent Ratings */}
-    <div className="mt-3 border-t pt-3">
-      <h4 className="text-sm font-semibold mb-2">Recent ratings</h4>
-      {recent.length === 0 ? (
-        <p className="text-xs text-muted-foreground">No recent ratings</p>
-      ) : (
-        recent.map((r) => (
-          <div key={r.id} className="text-xs bg-white/60 p-2 rounded mb-2">
-            <div className="flex justify-between items-start">
-              <div className="font-medium">{r.username ?? "Anon"}</div>
-              <div className="font-semibold text-amber-700">{r.rating}/10</div>
-            </div>
-            <div className="text-muted-foreground mt-1 truncate">{r.comment}</div>
-            <div className="text-[10px] text-muted-foreground mt-1">
-              {r.created_at ? new Date(r.created_at).toLocaleString() : ""}
-            </div>
+<div className="mt-3 border-t pt-3">
+  <h4 className="text-medium font-cabinet font-semibold mb-2 text-center">
+    Recent ratings
+  </h4>
+
+  <div className="max-h-20 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-amber-300 scrollbar-track-transparent">
+    {recent.length === 0 ? (
+      <p className="text-xs text-muted-foreground text-center font-cabinet">
+        No recent ratings
+      </p>
+    ) : (
+      recent.map((r) => (
+        <div
+          key={r.id}
+          className="text-sm bg-white/60 p-2 rounded mb-2 font-cabinet"
+        >
+          <div className="flex justify-between items-start">
+            <div className="font-semibold">{r.username ?? "Anon"}</div>
+            <div className="font-semibold text-amber-700">{r.rating}/10</div>
           </div>
-        ))
-      )}
-    </div>
+          <div className="text-muted-foreground mt-1 truncate font-medium">
+            {r.comment}
+          </div>
+          <div className="text-[10px] text-muted-foreground mt-1">
+            {r.created_at ? new Date(r.created_at).toLocaleString() : ""}
+          </div>
+        </div>
+      ))
+    )}
+  </div>
+</div>
+
   </PopoverContent>
 </Popover>
 
