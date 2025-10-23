@@ -7,12 +7,26 @@ import { Toaster } from "sonner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
+import { z } from "zod";
 import { useState, useEffect } from "react";
 
 export default function Home() {
   const router = useRouter();
   const [bubbles, setBubbles] = useState<Array<{left: string, delay: string, duration: string, size: string, opacity: string}>>([]);
   const [rating, setRating] = useState(5);
+
+  const [comment, setComment] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+
+  const [recent, setRecent] = useState<Array<{ id: number; username?: string; rating: number; comment?: string; created_at?: string }>>([]);
+
+  const ratingSchema = z.object({
+    rating: z.number().min(0).max(10),
+    comment: z.string().min(3, "Comment too short (min 3 chars)").max(500),
+  });
+
   useEffect(() => {
     const newBubbles = Array.from({ length: 30 }, (_, i) => ({
       left: `${Math.random() * 100}%`,
@@ -24,6 +38,71 @@ export default function Home() {
     console.log('Bubbles generated:', newBubbles.length);
     setBubbles(newBubbles);
   }, []);
+
+  // Fetch the 3 most recent ratings (for popover)
+  async function fetchRecentRatings() {
+    try {
+      const { data, error } = await supabase
+        .from("beer_ratings")
+        .select("id, username, rating, comment, created_at")
+        .order("created_at", { ascending: false })
+        .limit(3);
+  
+      if (error) {
+        console.error("fetchRecentRatings error:", error);
+        return;
+      }
+  
+      setRecent(data ?? []);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  
+
+  // Call once on mount (so popover has content)
+  useEffect(() => {
+    fetchRecentRatings();
+  }, []);
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+  
+    // Validate first
+    const result = ratingSchema.safeParse({ rating, comment });
+    if (!result.success) {
+      toast.error(result.error.errors[0].message);
+      setSubmitting(false);
+      return;
+    }
+  
+    try {
+      const { data, error } = await supabase
+        .from("beer_ratings")
+        .insert([{ rating, comment, username: "Anon" }])
+        .select(); // optional: return inserted rows
+  
+      if (error) throw error;
+  
+      toast.success("Submitted successfully! 🍻");
+  
+      // Reset form
+      setRating(5);
+      setComment("");
+  
+      // Refresh recent ratings
+      await fetchRecentRatings();
+    } catch (err: any) {
+      console.error("Submission failed:", err);
+      toast.error(err?.message || "Failed to submit rating 😭");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+  
+  
+  
+
   
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -262,71 +341,109 @@ export default function Home() {
 
       </main>
       <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <Popover>
-          <PopoverTrigger asChild>
-            <button className="flex items-center gap-2 hover:underline hover:underline-offset-4 transition-all duration-200 hover:scale-105 active:scale-95 active:opacity-70 font-satoshi">
-          <Image
-            aria-hidden
-                src="/slider.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-              Rate His Addiction
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-64 p-4 animate-in fade-in-0 zoom-in-95 duration-500 ease-out data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:duration-300">
-              <h3 className="font-cabinet font-semibold mb-2 text-center">
-                How much does AK love beer?
-              </h3>
+      <Popover>
+  <PopoverTrigger asChild>
+    <button className="flex items-center gap-2 hover:underline hover:underline-offset-4 transition-all duration-200 hover:scale-105 active:scale-95 active:opacity-70 font-satoshi">
+      <Image
+        aria-hidden
+        src="/slider.svg"
+        alt="File icon"
+        width={16}
+        height={16}
+      />
+      Rate His Addiction
+    </button>
+  </PopoverTrigger>
+  <PopoverContent className="w-72 p-4 animate-in fade-in-0 zoom-in-95 duration-500 ease-out data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=closed]:duration-300">
+    <h3 className="font-cabinet font-semibold mb-3 text-center">
+      How much does AK love beer?
+    </h3>
 
-              {/* Slider */}
-              <Slider
-                value={[rating]}
-                max={10}
-                step={1}
-                onValueChange={(val) => setRating(val[0])}
-                className="h-2 w-full mt-4 relative touch-none select-none"
-              >
-                {/* Track */}
-                <div className="absolute h-2 bg-gray-200 rounded-full w-full transition-all duration-150" />
-                {/* Filled track */}
-                <div
-                  className="absolute h-2 bg-amber-400 rounded-full transition-all duration-300 ease-out"
-                  style={{ width: `${(rating / 10) * 100}%` }}
-                />
-                {/* Thumb */}
-                <div
-                  className="absolute h-6 w-6 bg-white border border-gray-400 rounded-full -translate-y-1/2 cursor-pointer shadow transition-all duration-200 hover:scale-110 hover:shadow-lg"
-                  style={{ left: `${(rating / 10) * 100}%` }}
-                />
-              </Slider>
+    {/* Slider */}
+    <Slider
+      value={[rating]}
+      max={10}
+      step={1}
+      onValueChange={(val) => setRating(val[0])}
+      className="h-2 w-full mt-2 relative touch-none select-none"
+    >
+      <div className="absolute h-2 bg-gray-200 rounded-full w-full transition-all duration-150" />
+      <div
+        className="absolute h-2 bg-amber-400 rounded-full transition-all duration-300 ease-out"
+        style={{ width: `${(rating / 10) * 100}%` }}
+      />
+      <div
+        className="absolute h-6 w-6 bg-white border border-gray-400 rounded-full -translate-y-1/2 cursor-pointer shadow transition-all duration-200 hover:scale-110 hover:shadow-lg"
+        style={{ left: `${(rating / 10) * 100}%` }}
+      />
+    </Slider>
 
-              {/* Rating number */}
-              <p className="mt-2 text-center text-sm text-muted-foreground transition-all duration-200 font-satoshi">
-                <span className="font-semibold text-lg">{rating}</span> / 10
-              </p>
+    {/* Rating number */}
+    <p className="mt-2 text-center text-sm text-muted-foreground font-satoshi">
+      <span className="font-semibold text-lg">{rating}</span> / 10
+    </p>
 
-              {/* Dynamic message with colored background */}
-              <div
-                className={`mt-2 p-2 rounded text-center font-medium text-black text-sm transition-all duration-300 animate-in fade-in-0 slide-in-from-bottom-2 font-satoshi ${
-                  rating <= 3
-                    ? "bg-yellow-100 border border-yellow-200"
-                    : rating <= 7
-                    ? "bg-orange-100 border border-orange-200"
-                    : "bg-red-100 border border-red-200"
-                }`}
-              >
-                {rating <= 3
-                  ? "👑 A sober king indeed (this is a total lie)"
-                  : rating <= 7
-                  ? "⚠️ Someone stop him before he's in too deep"
-                  : "❗ Okay alcoholic alert"}
-              </div>
-            </PopoverContent>
+    {/* Dynamic message */}
+    <div
+      className={`mt-2 p-2 rounded text-center font-medium text-black text-sm font-satoshi ${
+        rating <= 3
+          ? "bg-yellow-100 border border-yellow-200"
+          : rating <= 7
+          ? "bg-orange-100 border border-orange-200"
+          : "bg-red-100 border border-red-200"
+      }`}
+    >
+      {rating <= 3
+        ? "👑 A sober king indeed (this is a total lie)"
+        : rating <= 7
+        ? "⚠️ Someone stop him before he's in too deep"
+        : "❗ Okay alcoholic alert"}
+    </div>
 
+    {/* Comment input */}
+    <textarea
+      placeholder="Any comments on his addiction?"
+      className="mt-3 w-full border border-gray-300 rounded-lg p-2 text-sm resize-none focus:ring-2 focus:ring-amber-300 focus:outline-none"
+      rows={2}
+      onChange={(e) => setComment(e.target.value)}
+      value={comment}
+      disabled={submitting}
+    />
 
-        </Popover>
+    {/* Submit button */}
+    <button
+      onClick={handleSubmit}
+      disabled={submitting}
+      className={`w-full mt-3 text-white font-medium rounded-md py-2 transition-all duration-200 ${
+        submitting ? "bg-amber-300 cursor-not-allowed" : "bg-amber-400 hover:bg-amber-500"
+      }`}
+    >
+      {submitting ? "Submitting..." : "Submit Rating"}
+    </button>
+
+    {/* Recent Ratings */}
+    <div className="mt-3 border-t pt-3">
+      <h4 className="text-sm font-semibold mb-2">Recent ratings</h4>
+      {recent.length === 0 ? (
+        <p className="text-xs text-muted-foreground">No recent ratings</p>
+      ) : (
+        recent.map((r) => (
+          <div key={r.id} className="text-xs bg-white/60 p-2 rounded mb-2">
+            <div className="flex justify-between items-start">
+              <div className="font-medium">{r.username ?? "Anon"}</div>
+              <div className="font-semibold text-amber-700">{r.rating}/10</div>
+            </div>
+            <div className="text-muted-foreground mt-1 truncate">{r.comment}</div>
+            <div className="text-[10px] text-muted-foreground mt-1">
+              {r.created_at ? new Date(r.created_at).toLocaleString() : ""}
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  </PopoverContent>
+</Popover>
+
         
         <a
           className="flex items-center gap-2 hover:underline hover:underline-offset-4 transition-all duration-200 hover:scale-105 font-satoshi"
