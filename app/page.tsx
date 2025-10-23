@@ -451,8 +451,8 @@ export default function Home() {
           className="text-sm bg-white/60 p-2 rounded mb-2 font-cabinet"
         >
           <div className="flex justify-between items-start">
-            <div className="font-semibold">{r.username ?? "Anon"}</div>
-            <div className="font-semibold text-amber-700">{r.rating}/10</div>
+            <div className="font-semibold font-satoshi">{r.username ?? "Anon"}</div>
+            <div className="font-semibold font-satoshi text-amber-700">{r.rating}/10</div>
           </div>
           <div className="text-muted-foreground mt-1 truncate font-medium">
             {r.comment}
