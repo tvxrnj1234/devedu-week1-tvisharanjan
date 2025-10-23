@@ -72,12 +72,15 @@ export default function Home() {
     setSubmitting(true);
   
     // Validate first
-    const result = ratingSchema.safeParse({ rating, comment });
+    const result = ratingSchema.safeParse({ username, rating, comment });
+
     if (!result.success) {
-      toast.error(result.error.errors[0].message);
+      const firstError = result.error.issues?.[0]?.message || "Invalid input.";
+      toast.error(firstError);
       setSubmitting(false);
       return;
     }
+
   
     try {
       const { data, error } = await supabase
